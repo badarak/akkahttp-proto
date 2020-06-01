@@ -52,7 +52,9 @@ class PersonListSpec extends AnyWordSpec with Matchers with ScalatestRouteTest w
       val router = new PersonRouter(repository)
 
       Get("/persons") ~> router.route ~> check {
-        status shouldBe StatusCodes.InternalServerError
+        status shouldBe ApiError.generic.statusCode
+        val resp = responseAs[String]
+        resp shouldBe ApiError.generic.message
       }
     }
 
@@ -61,7 +63,9 @@ class PersonListSpec extends AnyWordSpec with Matchers with ScalatestRouteTest w
       val router = new PersonRouter(repository)
 
       Get("/persons/miners") ~> router.route ~> check {
-        status shouldBe StatusCodes.InternalServerError
+        status shouldBe ApiError.generic.statusCode
+        val resp = responseAs[String]
+        resp shouldBe ApiError.generic.message
       }
     }
 
@@ -70,7 +74,9 @@ class PersonListSpec extends AnyWordSpec with Matchers with ScalatestRouteTest w
       val router = new PersonRouter(repository)
 
       Get("/persons/adults") ~> router.route ~> check {
-        status shouldBe StatusCodes.InternalServerError
+        status shouldBe ApiError.generic.statusCode
+        val resp = responseAs[String]
+        resp shouldBe ApiError.generic.message
       }
     }
   }

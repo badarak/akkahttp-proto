@@ -12,14 +12,18 @@ object Main  extends App {
   implicit val system : ActorSystem = ActorSystem(name = "personapi")
   import system.dispatcher
 
-  import akka.http.scaladsl.server.Directives._
-  def route: Route = path("hello"){
-    get {
-      complete("Hello, World!")
-    }
-  }
 
-  val binding = Http().bindAndHandle(route, host, port)
+  val personRepository = new PersonRepositoryImpl(Seq(
+    Person("1", "Barak", "Obama", 58),
+    Person("2", "Michelle", "Obama", 56),
+    Person("3", "Alain", "Pitt", 12),
+    Person("4", "Lionel", "Messi", 32)
+  ))
+
+  val router  = new PersonRouter(personRepository)
+  val server  = new Server(router, host, port)
+
+  val binding = server.bind()
   binding.onComplete{
     case Success(_) => print("Server Up")
     case Failure(error) => print(s"Failed: ${error.getMessage}")

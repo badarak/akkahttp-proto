@@ -8,7 +8,7 @@ trait Router {
 
 }
 
-class PersonRouter (personRepository : PersonRepository) extends Router with PersonDirectives {
+class PersonRouter (personRepository : PersonRepository) extends Router with PersonDirectives with ValidatorDirectives {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.generic.auto._
 
@@ -17,6 +17,14 @@ class PersonRouter (personRepository : PersonRepository) extends Router with Per
       get {
         handleWithGeneric(personRepository.all()) {persons =>
           complete(persons)
+        }
+      } ~ post {
+        entity(as[CreatePerson]) { createPerson =>
+          validateWith(PersonCreateValidator)(createPerson) {
+            handleWithGeneric(personRepository.save(createPerson)){ person =>
+              complete(person)
+            }
+          }
         }
       }
     }~ path("miners"){

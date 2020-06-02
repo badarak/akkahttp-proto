@@ -7,5 +7,7 @@ trait PersonMocks {
     override def adults(): Future[Seq[Person]] = Future.failed(new Exception("Mocked exception"))
 
     override def miners(): Future[Seq[Person]] = Future.failed(new Exception("Mocked exception"))
+
+    override def save(createPerson: CreatePerson): Future[Person] = Future.failed(new Exception("Mocked exception"))
   }
 }

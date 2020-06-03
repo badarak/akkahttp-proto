@@ -18,12 +18,24 @@ class PersonRouter (personRepository : PersonRepository) extends Router with Per
         handleWithGeneric(personRepository.all()) {persons =>
           complete(persons)
         }
-      } ~ post {
+      }~ post {
         entity(as[CreatePerson]) { createPerson =>
           validateWith(PersonCreateValidator)(createPerson) {
-            handleWithGeneric(personRepository.save(createPerson)){ person =>
-              complete(person)
+            handleWithGeneric(personRepository.save(createPerson)){ persons =>
+              complete(persons)
             }
+          }
+        }
+      }
+    } ~ path(Segment){id : String =>
+      put {
+        entity(as[UpdatePerson]) { updatePerson =>
+          validateWith(PersonUpdateValidator)(updatePerson){
+            handle(personRepository.update(id, updatePerson))  {
+              case PersonRepository.PersonNotFound(_) =>
+                ApiError.personNotFound(id)
+              case _ =>   ApiError.generic
+            } {person => complete(person)}
           }
         }
       }

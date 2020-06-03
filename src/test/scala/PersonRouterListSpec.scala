@@ -3,7 +3,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-class PersonListSpec extends AnyWordSpec with Matchers with ScalatestRouteTest with PersonMocks {
+class PersonRouterListSpec extends AnyWordSpec with Matchers with ScalatestRouteTest with PersonMocks {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.generic.auto._
 

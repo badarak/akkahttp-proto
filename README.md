@@ -2,11 +2,12 @@
 
 A proto project to manipulate Akka HTTP's concepts
 
-I will build a CRUD backend application for managing persons (it's just a fictional application! ).
+It consists a CRUD back-end application for managing persons. 
+A person has the flowing attributes : firstName, lastName, age.
 
-In the project i will :
+The proto covers :
 
-- Use the Akka HTTP's routing DSL
-- Create directives
-- Parse models to and from JSON
-- Unit test routes using the Akka HTTP's testkit and scalatest
+- use of the Akka HTTP's routing DSL
+- creating directives
+- parsing models to and from JSON
+- unit testing routes using the Akka HTTP's testkit and scalatest

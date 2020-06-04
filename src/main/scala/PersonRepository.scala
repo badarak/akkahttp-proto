@@ -10,6 +10,7 @@ trait PersonRepository {
   def miners() : Future[Seq[Person]]
   def save(createPerson: CreatePerson): Future[Person]
   def update(id : String, updatePerson: UpdatePerson) : Future[Person]
+  def delete(id : String) : Future[Boolean]
 }
 
 object PersonRepository {
@@ -37,7 +38,7 @@ class PersonRepositoryImpl(initialListOfPerson : Seq[Person] = Seq.empty)(implic
   }
 
   override def update(id : String, updatePerson: UpdatePerson): Future[Person] = {
-    initialListOfPerson.find(_.id == id) match {
+    persons.find(_.id == id) match {
       case Some(foundPerson) =>
         val newPerson = updatePersonHelper(foundPerson, updatePerson)
         persons = persons.map(p => if(p.id == id) newPerson else p)
@@ -53,5 +54,14 @@ class PersonRepositoryImpl(initialListOfPerson : Seq[Person] = Seq.empty)(implic
     val t2 = updatePerson.lastName.map(lastName => t1.copy(lastName =lastName))
                                   .getOrElse(t1)
     updatePerson.age.map(age => t2.copy(age = age)).getOrElse(t2)
+  }
+
+  override def delete(id: String): Future[Boolean] = {
+    persons.find(_.id == id) match {
+      case Some(foundPerson) =>
+        persons = persons.filter(_.id != id)
+        Future.successful(true)
+      case None => Future.failed(PersonNotFound(id))
+    }
   }
 }

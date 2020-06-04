@@ -12,5 +12,7 @@ trait PersonMocks {
     override def save(createPerson: CreatePerson): Future[Person] = Future.failed(new Exception("Mocked exception"))
 
     override def update(id: String, updatePerson: UpdatePerson): Future[Person] = Future.failed(new Exception("Mocked exception"))
+
+    override def delete(id: String): Future[Boolean] = Future.failed(new Exception("Mocked exception"))
   }
 }

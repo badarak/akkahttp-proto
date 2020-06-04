@@ -1,7 +1,4 @@
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.{Directives, Route}
-
-import scala.util.{Failure, Success}
+import akka.http.scaladsl.server.Route
 
 trait Router {
   def route: Route
@@ -38,6 +35,12 @@ class PersonRouter (personRepository : PersonRepository) extends Router with Per
             } {person => complete(person)}
           }
         }
+      } ~ delete{
+          handle(personRepository.delete(id))  {
+            case PersonRepository.PersonNotFound(_) =>
+              ApiError.personNotFound(id)
+            case _ =>   ApiError.generic
+          } { id => complete(id)}
       }
     }~ path("miners"){
       get {

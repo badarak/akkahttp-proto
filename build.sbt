@@ -1,8 +1,11 @@
+enablePlugins(JavaAppPackaging, AshScriptPlugin)
+
 name := "akkahttp-proto"
 
-version := "0.1"
+version := "0.2"
 
 scalaVersion := "2.13.1"
+dockerBaseImage := "openjdk:8-jre-alpine"
 
 val akkaVersion = "2.6.5"
 val akkaHttpVersion = "10.1.12"

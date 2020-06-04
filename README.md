@@ -10,5 +10,3 @@ In the project i will :
 - Create directives
 - Parse models to and from JSON
 - Unit test routes using the Akka HTTP's testkit and scalatest
-
-GO !!!

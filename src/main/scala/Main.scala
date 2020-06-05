@@ -23,8 +23,11 @@ object Main  extends App {
 
   val binding = server.bind()
   binding.onComplete{
-    case Success(_) => print("Server Up")
-    case Failure(error) => print(s"Failed: ${error.getMessage}")
+    case Success(_) =>
+      system.log.info("Server online at http://{}:{}/", host, port)
+    case Failure(error) =>
+      system.log.error("Failed to bind HTTP endpoint, terminating system", error)
+      system.terminate()
   }
 
   import scala.concurrent.duration._

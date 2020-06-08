@@ -1,7 +1,13 @@
+package com.proto.person.api
+
 import java.util.UUID
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.proto.person.domain.{Person, UpdatePerson}
+import com.proto.person.error.ApiError
+import com.proto.person.mock.PersonMocks
+import com.proto.person.persistence.PersonRepositoryImpl
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -22,7 +28,7 @@ class PersonRouterUpdateSpec extends AnyWordSpec with Matchers with ScalatestRou
     Some(58)
   )
 
-  "A PersonRouter" should {
+  "A com.proto.person.api.PersonRouter" should {
 
     "update a person with valid data" in {
 
@@ -45,8 +51,7 @@ class PersonRouterUpdateSpec extends AnyWordSpec with Matchers with ScalatestRou
 
       Put(s"/persons/5", testUpdatePerson) ~> router.route ~> check{
         status shouldBe ApiError.personNotFound("5").statusCode
-        val resp = responseAs[String]
-        resp shouldBe ApiError.personNotFound("5").message
+
       }
     }
 
@@ -57,8 +62,6 @@ class PersonRouterUpdateSpec extends AnyWordSpec with Matchers with ScalatestRou
 
       Put(s"/persons/$personId", testUpdatePerson.copy(lastName = Some(""))) ~> router.route ~> check{
         status shouldBe ApiError.EmptyLastNameField.statusCode
-        val resp = responseAs[String]
-        resp shouldBe ApiError.EmptyLastNameField.message
       }
     }
 
@@ -69,8 +72,6 @@ class PersonRouterUpdateSpec extends AnyWordSpec with Matchers with ScalatestRou
 
       Put(s"/persons/$personId", testUpdatePerson.copy(age = Some(131))) ~> router.route ~> check{
         status shouldBe ApiError.InvalidAgeField.statusCode
-        val resp = responseAs[String]
-        resp shouldBe ApiError.InvalidAgeField.message
       }
     }
 
@@ -81,8 +82,6 @@ class PersonRouterUpdateSpec extends AnyWordSpec with Matchers with ScalatestRou
 
       Put(s"/persons/$personId", testPerson) ~> router.route ~> check{
         status shouldBe ApiError.generic.statusCode
-        val resp = responseAs[String]
-        resp shouldBe ApiError.generic.message
       }
     }
   }

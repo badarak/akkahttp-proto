@@ -1,6 +1,7 @@
-import akka.japi
+package com.proto.person.api.validator
 
-import scala.concurrent.Future
+import com.proto.person.domain.{CreatePerson, UpdatePerson}
+import com.proto.person.error.ApiError
 
 trait Validator[T]{
   def validate(t: T): Option[ApiError]

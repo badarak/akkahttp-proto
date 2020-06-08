@@ -1,5 +1,6 @@
+package com.proto.person.error
+
 import akka.http.scaladsl.model.{StatusCode, StatusCodes}
-import akka.http.scaladsl.server.Route
 
 final case class ApiError(statusCode: StatusCode, message: String)
 

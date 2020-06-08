@@ -1,18 +1,27 @@
+package com.proto.person.api
+
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.proto.person.domain.{JsonSupport, Person}
+import com.proto.person.error.ApiError
+import com.proto.person.mock.PersonMocks
+import com.proto.person.persistence.PersonRepositoryImpl
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-class PersonRouterListSpec extends AnyWordSpec with Matchers with ScalatestRouteTest with PersonMocks {
-  import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-  import io.circe.generic.auto._
+class PersonRouterListSpec extends AnyWordSpec
+                           with JsonSupport
+                           with Matchers
+                           with ScalatestRouteTest
+                           with PersonMocks {
+
 
   private val adult = new Person("1", "Barak", "Obama", 58)
   private val miner = new Person("3", "Alain", "Pitt", 12)
   private val persons = Seq(adult, miner)
 
 
-  "A PersonRouter" should {
+  "A com.proto.person.api.PersonRouter" should {
 
     "return all persons" in {
       val repository = new PersonRepositoryImpl(persons)

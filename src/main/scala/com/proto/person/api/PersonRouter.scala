@@ -1,13 +1,21 @@
+package com.proto.person.api
+
 import akka.http.scaladsl.server.Route
+import com.proto.person.api.directive.PersonDirectives
+import com.proto.person.api.validator.{PersonCreateValidator, PersonUpdateValidator, ValidatorDirectives}
+import com.proto.person.domain.{CreatePerson, JsonSupport, UpdatePerson}
+import com.proto.person.error.ApiError
+import com.proto.person.persistence.PersonRepository
 
 trait Router {
   def route: Route
 
 }
 
-class PersonRouter (personRepository : PersonRepository) extends Router with PersonDirectives with ValidatorDirectives {
-  import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-  import io.circe.generic.auto._
+class PersonRouter (personRepository : PersonRepository) extends Router
+                                                        with JsonSupport
+                                                        with PersonDirectives
+                                                        with ValidatorDirectives {
 
   override def route: Route = pathPrefix("persons") {
     pathEndOrSingleSlash {
@@ -40,7 +48,7 @@ class PersonRouter (personRepository : PersonRepository) extends Router with Per
             case PersonRepository.PersonNotFound(_) =>
               ApiError.personNotFound(id)
             case _ =>   ApiError.generic
-          } { id => complete(id)}
+          } { person => complete(person)}
       }
     }~ path("miners"){
       get {

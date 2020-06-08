@@ -1,15 +1,19 @@
+package com.proto.person
+
 import akka.actor.ActorSystem
+import com.proto.person.api.PersonRouter
+import com.proto.person.domain.Person
+import com.proto.person.persistence.PersonRepositoryImpl
 
 import scala.concurrent.Await
 import scala.util.{Failure, Success}
 
-object Main  extends App {
+object ProtoApp  extends App {
   val host = "0.0.0.0"
   val port = 9000
 
   implicit val system : ActorSystem = ActorSystem(name = "personapi")
-  import system.dispatcher
-
+  implicit val executionContext = system.dispatcher
 
   val personRepository = new PersonRepositoryImpl(Seq(
     Person("1", "Barak", "Obama", 58),

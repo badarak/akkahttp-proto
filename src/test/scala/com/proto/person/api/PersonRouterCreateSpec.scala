@@ -1,18 +1,26 @@
+package com.proto.person.api
+
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.proto.person.domain.{CreatePerson, JsonSupport, Person}
+import com.proto.person.error.ApiError
+import com.proto.person.mock.PersonMocks
+import com.proto.person.persistence.PersonRepositoryImpl
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-class PersonRouterCreateSpec extends AnyWordSpec with Matchers with ScalatestRouteTest with PersonMocks {
-  import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-  import io.circe.generic.auto._
+class PersonRouterCreateSpec extends AnyWordSpec
+                             with Matchers
+                             with ScalatestRouteTest
+                             with PersonMocks
+                             with  JsonSupport{
 
   val testPerson = Person("1", "Barak", "Obama", 58)
 
   val testCreatePerson = CreatePerson("Edam", "Miler", 19)
 
 
-  "A PersonRouter" should {
+  "A com.proto.person.api.PersonRouter" should {
 
     "create a person with valid data" in {
 
@@ -33,8 +41,6 @@ class PersonRouterCreateSpec extends AnyWordSpec with Matchers with ScalatestRou
 
       Post("/persons", testCreatePerson.copy(lastName = "")) ~> router.route ~> check{
         status shouldBe ApiError.EmptyLastNameField.statusCode
-        val resp = responseAs[String]
-        resp shouldBe ApiError.EmptyLastNameField.message
       }
     }
 

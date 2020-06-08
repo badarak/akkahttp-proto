@@ -1,6 +1,9 @@
+package com.proto.person
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
+import com.proto.person.api.Router
 
 import scala.concurrent.Future
 

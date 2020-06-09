@@ -1,6 +1,9 @@
+package com.proto.person.persistence
+
 import java.util.UUID
 
-import PersonRepository.PersonNotFound
+import com.proto.person.domain.{CreatePerson, Person, UpdatePerson}
+import com.proto.person.persistence.PersonRepository.PersonNotFound
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -10,15 +13,15 @@ trait PersonRepository {
   def miners() : Future[Seq[Person]]
   def save(createPerson: CreatePerson): Future[Person]
   def update(id : String, updatePerson: UpdatePerson) : Future[Person]
-  def delete(id : String) : Future[Boolean]
+  def delete(id : String) : Future[Person]
 }
 
 object PersonRepository {
-  final case class PersonNotFound(id : String) extends Exception(s"Person with id $id not found.")
+  final case class PersonNotFound(id : String) extends Exception(s"com.proto.model.Person with id $id not found.")
 }
 
 class PersonRepositoryImpl(initialListOfPerson : Seq[Person] = Seq.empty)(implicit ec : ExecutionContext)
-                          extends PersonRepository {
+  extends PersonRepository {
   var persons: Vector[Person] = initialListOfPerson.toVector
 
   override def all(): Future[Seq[Person]] = Future.successful(persons)
@@ -50,17 +53,17 @@ class PersonRepositoryImpl(initialListOfPerson : Seq[Person] = Seq.empty)(implic
 
   private def updatePersonHelper(foundPerson: Person, updatePerson: UpdatePerson) : Person = {
     val t1 = updatePerson.firstName.map(firstName => foundPerson.copy(firstName = firstName))
-                                   .getOrElse(foundPerson)
+      .getOrElse(foundPerson)
     val t2 = updatePerson.lastName.map(lastName => t1.copy(lastName =lastName))
-                                  .getOrElse(t1)
+      .getOrElse(t1)
     updatePerson.age.map(age => t2.copy(age = age)).getOrElse(t2)
   }
 
-  override def delete(id: String): Future[Boolean] = {
+  override def delete(id: String): Future[Person] = {
     persons.find(_.id == id) match {
       case Some(foundPerson) =>
         persons = persons.filter(_.id != id)
-        Future.successful(true)
+        Future.successful(foundPerson)
       case None => Future.failed(PersonNotFound(id))
     }
   }

@@ -1,5 +1,6 @@
+package com.proto.person.error
+
 import akka.http.scaladsl.model.{StatusCode, StatusCodes}
-import akka.http.scaladsl.server.Route
 
 final case class ApiError(statusCode: StatusCode, message: String)
 
@@ -11,9 +12,9 @@ object ApiError {
                                           "The lastNameField must not be empty.")
 
   val InvalidAgeField : ApiError = new ApiError(StatusCodes.BadRequest,
-                                          "The age field must not be empty et must be valid number < 122")
+                                          "The age field must not be empty and must be valid number < 122")
   def personNotFound(id: String): ApiError = new ApiError(StatusCodes.BadRequest,
-    "The person with the id $id not found.")
+    s"The person with the id : ${id} not found.")
 
 }
 

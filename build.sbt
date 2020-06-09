@@ -2,7 +2,7 @@ enablePlugins(JavaAppPackaging, AshScriptPlugin)
 
 name := "akkahttp-proto"
 
-version := "0.2"
+version := "0.3"
 
 scalaVersion := "2.13.1"
 dockerBaseImage := "openjdk:8-jre-alpine"
@@ -21,13 +21,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
-
-  "io.circe" %% "circe-core" % circeVersion,
-  "io.circe" %% "circe-generic" % circeVersion,
-  "io.circe" %% "circe-parser" % circeVersion,
-  "de.heikoseeberger" %% "akka-http-circe" % "1.32.0",
-
-  "org.mongodb.scala" %% "mongo-scala-driver" % "2.9.0",
 
   "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
   "ch.qos.logback"    % "logback-classic"           % "1.2.3"

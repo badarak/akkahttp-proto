@@ -6,6 +6,7 @@ import com.proto.person.domain.{JsonSupport, Person}
 import com.proto.person.error.ApiError
 import com.proto.person.mock.PersonMocks
 import com.proto.person.persistence.PersonRepositoryImpl
+import com.proto.person.service.PersonService
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -16,18 +17,20 @@ class PersonRouterListSpec extends AnyWordSpec
                            with PersonMocks {
 
 
-  private val adult = new Person("1", "Barak", "Obama", 58)
-  private val miner = new Person("3", "Alain", "Pitt", 12)
-  private val persons = Seq(adult, miner)
+  private val adult: Person = Person("1", "Barak", "Obama", 58)
+  private val miner: Person = Person("3", "Alain", "Pitt", 12)
+  private val persons: Seq[Person] = Seq(adult, miner)
 
+  val repository = new PersonRepositoryImpl(persons)
+  val router: PersonRouter = new PersonRouter {
+    override val personService: PersonService = new PersonService(repository)
+  }
 
   "A com.proto.person.api.PersonRouter" should {
 
     "return all persons" in {
-      val repository = new PersonRepositoryImpl(persons)
-      val router = new PersonRouter(repository)
 
-      Get("/persons") ~> router.route ~> check {
+      Get("/persons") ~> router.personRoutes ~> check {
         status shouldBe StatusCodes.OK
         val resp = responseAs[Seq[Person]]
         resp shouldBe persons
@@ -35,10 +38,8 @@ class PersonRouterListSpec extends AnyWordSpec
     }
 
     "return all miners" in {
-      val repository = new PersonRepositoryImpl(persons)
-      val router = new PersonRouter(repository)
 
-      Get("/persons/miners") ~> router.route ~> check {
+      Get("/persons/miners") ~> router.personRoutes ~> check {
         status shouldBe StatusCodes.OK
         val resp = responseAs[Seq[Person]]
         resp shouldBe Seq(miner)
@@ -46,21 +47,22 @@ class PersonRouterListSpec extends AnyWordSpec
     }
 
     "return all adults" in {
-      val repository = new PersonRepositoryImpl(persons)
-      val router = new PersonRouter(repository)
 
-      Get("/persons/adults") ~> router.route ~> check {
+      Get("/persons/adults") ~> router.personRoutes ~> check {
         status shouldBe StatusCodes.OK
         val resp = responseAs[Seq[Person]]
         resp shouldBe Seq(adult)
       }
     }
 
-    "handle repository failure in the persons route" in {
-      val repository = new FailingRepository
-      val router = new PersonRouter(repository)
+    val failingrepository = new FailingRepository()
+    val failingRoute = new PersonRouter() {
+      override val personService: PersonService = new PersonService(failingrepository)
+    }
 
-      Get("/persons") ~> router.route ~> check {
+    "handle repository failure in the persons route" in {
+
+      Get("/persons") ~> failingRoute.personRoutes ~> check {
         status shouldBe ApiError.generic.statusCode
         val resp = responseAs[String]
         resp shouldBe ApiError.generic.message
@@ -68,10 +70,8 @@ class PersonRouterListSpec extends AnyWordSpec
     }
 
     "handle repository failure in the miners route" in {
-      val repository = new FailingRepository
-      val router = new PersonRouter(repository)
 
-      Get("/persons/miners") ~> router.route ~> check {
+      Get("/persons/miners") ~> failingRoute.personRoutes ~> check {
         status shouldBe ApiError.generic.statusCode
         val resp = responseAs[String]
         resp shouldBe ApiError.generic.message
@@ -79,10 +79,8 @@ class PersonRouterListSpec extends AnyWordSpec
     }
 
     "handle repository failure in the adults route" in {
-      val repository = new FailingRepository
-      val router = new PersonRouter(repository)
 
-      Get("/persons/adults") ~> router.route ~> check {
+      Get("/persons/adults") ~> failingRoute.personRoutes ~> check {
         status shouldBe ApiError.generic.statusCode
         val resp = responseAs[String]
         resp shouldBe ApiError.generic.message

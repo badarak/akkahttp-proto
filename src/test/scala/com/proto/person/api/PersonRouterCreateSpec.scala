@@ -6,6 +6,7 @@ import com.proto.person.domain.{CreatePerson, JsonSupport, Person}
 import com.proto.person.error.ApiError
 import com.proto.person.mock.PersonMocks
 import com.proto.person.persistence.PersonRepositoryImpl
+import com.proto.person.service.PersonService
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -15,19 +16,20 @@ class PersonRouterCreateSpec extends AnyWordSpec
                              with PersonMocks
                              with  JsonSupport{
 
-  val testPerson = Person("1", "Barak", "Obama", 58)
+  val testPerson: Person = Person("1", "Barak", "Obama", 58)
 
   val testCreatePerson = CreatePerson("Edam", "Miler", 19)
 
+  val repository = new PersonRepositoryImpl(Seq(testPerson))
+  val router: PersonRouter = new PersonRouter {
+    override val personService: PersonService = new PersonService(repository)
+  }
 
   "A com.proto.person.api.PersonRouter" should {
 
     "create a person with valid data" in {
 
-      val repository = new PersonRepositoryImpl(Seq(testPerson))
-      val router = new PersonRouter(repository)
-
-      Post("/persons", testCreatePerson) ~> router.route ~> check{
+      Post("/persons", testCreatePerson) ~> router.personRoutes ~> check{
         status shouldBe StatusCodes.OK
         val resp = responseAs[Person]
         resp.lastName shouldBe testCreatePerson.lastName
@@ -36,30 +38,29 @@ class PersonRouterCreateSpec extends AnyWordSpec
     }
 
     "person is not created with invalid lastName field" in {
-      val repository = new PersonRepositoryImpl(Seq(testPerson))
-      val router = new PersonRouter(repository)
 
-      Post("/persons", testCreatePerson.copy(lastName = "")) ~> router.route ~> check{
+      Post("/persons", testCreatePerson.copy(lastName = "")) ~> router.personRoutes ~> check{
         status shouldBe ApiError.EmptyLastNameField.statusCode
       }
     }
 
     "person is not created with invalid age field" in {
-      val repository = new PersonRepositoryImpl(Seq(testPerson))
-      val router = new PersonRouter(repository)
 
-      Post("/persons", testCreatePerson.copy(age = 131)) ~> router.route ~> check{
+      Post("/persons", testCreatePerson.copy(age = 131)) ~> router.personRoutes ~> check{
         status shouldBe ApiError.InvalidAgeField.statusCode
         val resp = responseAs[String]
         resp shouldBe ApiError.InvalidAgeField.message
       }
     }
 
-    "handle repository failure when updating todos" in {
-      val repository = new FailingRepository
-      val router = new PersonRouter(repository)
+    val failingrepository = new FailingRepository()
+    val failingRoute = new PersonRouter() {
+      override val personService: PersonService = new PersonService(failingrepository)
+    }
 
-      Post(s"/persons", testCreatePerson) ~> router.route ~> check {
+    "handle repository failure when updating todos" in {
+
+      Post(s"/persons", testCreatePerson) ~> failingRoute.personRoutes ~> check {
         status shouldBe ApiError.generic.statusCode
         val resp = responseAs[String]
         resp shouldBe ApiError.generic.message

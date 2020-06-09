@@ -10,8 +10,10 @@ trait Validator[T]{
 object PersonCreateValidator extends Validator[CreatePerson]{
 
   override def validate(createPerson: CreatePerson): Option[ApiError] =  {
-    if(createPerson.lastName.isEmpty) Some(ApiError.EmptyLastNameField)
-    else if (!createPerson.age.isValidInt || createPerson.age > 130) Some(ApiError.InvalidAgeField)
+    if(createPerson.lastName.isEmpty)
+      Some(ApiError.EmptyLastNameField)
+    else if (!createPerson.age.isValidInt || createPerson.age < 0 || createPerson.age > 130)
+      Some(ApiError.InvalidAgeField)
     else None
   }
 }
@@ -19,8 +21,10 @@ object PersonCreateValidator extends Validator[CreatePerson]{
 object PersonUpdateValidator extends Validator[UpdatePerson]{
 
   override def validate(updatePerson: UpdatePerson): Option[ApiError] = {
-    if(updatePerson.lastName.exists(_.isEmpty)) Some(ApiError.EmptyLastNameField)
-    else if (updatePerson.age.exists(a => !(a.isValidInt) || a > 130)) Some(ApiError.InvalidAgeField)
+    if(updatePerson.lastName.exists(_.isEmpty))
+      Some(ApiError.EmptyLastNameField)
+    else if (updatePerson.age.exists(a => !(a.isValidInt) || a < 0 || a > 130))
+      Some(ApiError.InvalidAgeField)
     else None
   }
 }

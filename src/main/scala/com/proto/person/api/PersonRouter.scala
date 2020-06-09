@@ -6,27 +6,25 @@ import com.proto.person.api.validator.{PersonCreateValidator, PersonUpdateValida
 import com.proto.person.domain.{CreatePerson, JsonSupport, UpdatePerson}
 import com.proto.person.error.ApiError
 import com.proto.person.persistence.PersonRepository
+import com.proto.person.service.PersonService
 
-trait Router {
-  def route: Route
 
-}
+trait PersonRouter extends JsonSupport
+                   with PersonDirectives
+                   with ValidatorDirectives {
 
-class PersonRouter (personRepository : PersonRepository) extends Router
-                                                        with JsonSupport
-                                                        with PersonDirectives
-                                                        with ValidatorDirectives {
+  val personService : PersonService
 
-  override def route: Route = pathPrefix("persons") {
+  def personRoutes: Route = pathPrefix("persons") {
     pathEndOrSingleSlash {
       get {
-        handleWithGeneric(personRepository.all()) {persons =>
+        handleWithGeneric(personService.all()) {persons =>
           complete(persons)
         }
       }~ post {
         entity(as[CreatePerson]) { createPerson =>
           validateWith(PersonCreateValidator)(createPerson) {
-            handleWithGeneric(personRepository.save(createPerson)){ persons =>
+            handleWithGeneric(personService.save(createPerson)){ persons =>
               complete(persons)
             }
           }
@@ -36,7 +34,7 @@ class PersonRouter (personRepository : PersonRepository) extends Router
       put {
         entity(as[UpdatePerson]) { updatePerson =>
           validateWith(PersonUpdateValidator)(updatePerson){
-            handle(personRepository.update(id, updatePerson))  {
+            handle(personService.update(id, updatePerson))  {
               case PersonRepository.PersonNotFound(_) =>
                 ApiError.personNotFound(id)
               case _ =>   ApiError.generic
@@ -44,7 +42,7 @@ class PersonRouter (personRepository : PersonRepository) extends Router
           }
         }
       } ~ delete{
-          handle(personRepository.delete(id))  {
+          handle(personService.delete(id))  {
             case PersonRepository.PersonNotFound(_) =>
               ApiError.personNotFound(id)
             case _ =>   ApiError.generic
@@ -52,13 +50,13 @@ class PersonRouter (personRepository : PersonRepository) extends Router
       }
     }~ path("miners"){
       get {
-        handleWithGeneric(personRepository.miners){persons =>
+        handleWithGeneric(personService.miners()){persons =>
           complete(persons)
         }
       }
     }~ path("adults"){
       get {
-        handleWithGeneric(personRepository.adults){persons =>
+        handleWithGeneric(personService.adults()){persons =>
           complete(persons)
         }
       }

@@ -21,7 +21,7 @@ object PersonRepository {
 }
 
 class PersonRepositoryImpl(initialListOfPerson : Seq[Person] = Seq.empty)(implicit ec : ExecutionContext)
-                          extends PersonRepository {
+  extends PersonRepository {
   var persons: Vector[Person] = initialListOfPerson.toVector
 
   override def all(): Future[Seq[Person]] = Future.successful(persons)
@@ -53,9 +53,9 @@ class PersonRepositoryImpl(initialListOfPerson : Seq[Person] = Seq.empty)(implic
 
   private def updatePersonHelper(foundPerson: Person, updatePerson: UpdatePerson) : Person = {
     val t1 = updatePerson.firstName.map(firstName => foundPerson.copy(firstName = firstName))
-                                   .getOrElse(foundPerson)
+      .getOrElse(foundPerson)
     val t2 = updatePerson.lastName.map(lastName => t1.copy(lastName =lastName))
-                                  .getOrElse(t1)
+      .getOrElse(t1)
     updatePerson.age.map(age => t2.copy(age = age)).getOrElse(t2)
   }
 

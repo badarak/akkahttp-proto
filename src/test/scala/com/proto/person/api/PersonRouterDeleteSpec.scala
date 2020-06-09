@@ -8,6 +8,7 @@ import com.proto.person.domain.{JsonSupport, Person}
 import com.proto.person.error.ApiError
 import com.proto.person.mock.PersonMocks
 import com.proto.person.persistence.PersonRepositoryImpl
+import com.proto.person.service.PersonService
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -17,22 +18,24 @@ class PersonRouterDeleteSpec extends AnyWordSpec
                              with PersonMocks
                              with  JsonSupport {
 
-  val personId = UUID.randomUUID().toString
-  val testPerson = Person(
+  val personId: String = UUID.randomUUID().toString
+  val testPerson: Person = Person(
     personId,
     "Lionel",
     "Messi",
     32
   )
 
+  val repository = new PersonRepositoryImpl(Seq(testPerson))
+  val router: PersonRouter = new PersonRouter {
+    override val personService: PersonService = new PersonService(repository)
+  }
+
   "A com.proto.person.api.PersonRouter" should {
 
     "delete an existent person " in {
 
-      val repository = new PersonRepositoryImpl(Seq(testPerson))
-      val router = new PersonRouter(repository)
-
-      Delete(s"/persons/$personId") ~> router.route ~> check{
+      Delete(s"/persons/$personId") ~> router.personRoutes ~> check{
         status shouldBe StatusCodes.OK
         val resp = responseAs[Person]
         resp.id shouldBe testPerson.id
@@ -43,22 +46,21 @@ class PersonRouterDeleteSpec extends AnyWordSpec
 
     "return not found with delete non existent person" in {
 
-      val repository = new PersonRepositoryImpl(Seq(testPerson))
-      val router = new PersonRouter(repository)
-
-      Delete(s"/persons/5") ~> router.route ~> check{
+      Delete(s"/persons/5") ~> router.personRoutes ~> check{
         status shouldBe ApiError.personNotFound("5").statusCode
         val resp = responseAs[String]
         resp shouldBe ApiError.personNotFound("5").message
       }
     }
 
+    val failingrepository = new FailingRepository()
+    val failingRoute = new PersonRouter() {
+      override val personService: PersonService = new PersonService(failingrepository)
+    }
+
     "handle repository failure when deleting person" in {
 
-      val repository = new FailingRepository
-      val router = new PersonRouter(repository)
-
-      Delete(s"/persons/$personId") ~> router.route ~> check{
+      Delete(s"/persons/$personId") ~> failingRoute.personRoutes ~> check{
         status shouldBe ApiError.generic.statusCode
         val resp = responseAs[String]
         resp shouldBe ApiError.generic.message

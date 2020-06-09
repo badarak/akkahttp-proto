@@ -12,9 +12,9 @@ object ApiError {
                                           "The lastNameField must not be empty.")
 
   val InvalidAgeField : ApiError = new ApiError(StatusCodes.BadRequest,
-                                          "The age field must not be empty et must be valid number < 122")
+                                          "The age field must not be empty and must be valid number < 122")
   def personNotFound(id: String): ApiError = new ApiError(StatusCodes.BadRequest,
-    "The person with the id $id not found.")
+    s"The person with the id : ${id} not found.")
 
 }
 
